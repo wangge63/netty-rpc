@@ -4,6 +4,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.BackgroundCallback;
 import org.apache.curator.framework.api.CuratorEvent;
+import org.apache.curator.framework.api.CuratorEventType;
 import org.apache.curator.framework.api.CuratorListener;
 import org.apache.curator.framework.recipes.cache.*;
 import org.apache.curator.framework.state.ConnectionStateListener;
@@ -84,9 +85,12 @@ public class CuratorClient {
             public void eventReceived(CuratorFramework client, CuratorEvent event) throws Exception {
                 // examine events for details
 
-                logger.info("event: " + event.getName() + " data: " + new String(event.getData()));
+                if (event.getType() == CuratorEventType.SET_DATA) {
+                    logger.info("event: " + event.getType().toString() + " path: " + event.getPath() + " data: " + new String(payload));
+                }
             }
         };
+        client.getCuratorListenable().addListener(listener);
 
         client.setData().inBackground().forPath(path, payload);
     }
