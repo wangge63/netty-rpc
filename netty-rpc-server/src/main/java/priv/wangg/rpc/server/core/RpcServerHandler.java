@@ -5,7 +5,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
-import net.sf.cglib.reflect.FastClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import priv.wangg.rpc.model.Beat;
@@ -13,6 +12,7 @@ import priv.wangg.rpc.model.RpcRequest;
 import priv.wangg.rpc.model.RpcResponse;
 import priv.wangg.rpc.util.ServiceUtil;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -84,9 +84,12 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
             logger.debug(parameters[i].toString());
         }
 
-        FastClass serviceFastClass = FastClass.create(serviceClass);
-        int methodIndex = serviceFastClass.getIndex(methodName, parameterTypes);
-        return serviceFastClass.invoke(methodIndex, serviceBean, parameters);
+        Method method = serviceClass.getDeclaredMethod(methodName, parameterTypes);
+        return method.invoke(serviceBean, parameters);
+
+        // FastClass serviceFastClass = FastClass.create(serviceClass);
+        // int methodIndex = serviceFastClass.getIndex(methodName, parameterTypes);
+        // return serviceFastClass.invoke(methodIndex, serviceBean, parameters);
     }
 
     @Override
